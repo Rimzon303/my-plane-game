@@ -11,6 +11,7 @@
             --btn-blue: #3498db;
             --win-green: #2ecc71;
             --loss-red: #e74c3c;
+            --star-gold: #f1c40f;
         }
 
         body {
@@ -21,262 +22,194 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            /* Запрет выделения текста и элементов */
             user-select: none;
             -webkit-user-select: none;
-            -webkit-touch-callout: none;
         }
 
+        /* Верхняя панель со Звездами и Очками */
         .top-bar {
             background: rgba(255, 255, 255, 0.9);
-            padding: 15px;
-            text-align: center;
-            font-size: 24px;
-            font-weight: bold;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 100;
         }
+
+        .balance-item { font-size: 18px; font-weight: bold; }
+        .stars-count { color: #f39c12; background: #fef5e7; padding: 5px 12px; border-radius: 15px; display: flex; align-items: center; cursor: pointer; }
+        .add-btn { margin-left: 8px; background: #f39c12; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-weight: bold; cursor: pointer; line-height: 20px; text-align: center; font-size: 14px; }
 
         .screen { flex: 1; display: none; flex-direction: column; align-items: center; padding: 15px; overflow-y: auto; }
         .active-screen { display: flex; }
 
-        /* Кликер */
-        #plane {
-            font-size: 100px;
-            margin-top: 80px;
-            cursor: pointer;
-            transition: transform 0.05s;
-            filter: drop-shadow(0 5px 5px rgba(0,0,0,0.1));
-            -webkit-tap-highlight-color: transparent;
-        }
+        /* Самолет */
+        #plane { font-size: 100px; margin-top: 50px; cursor: pointer; transition: transform 0.05s; -webkit-tap-highlight-color: transparent; }
         #plane:active { transform: scale(0.85); }
 
         /* Магазин */
-        .shop-container { width: 100%; display: flex; flex-direction: column; gap: 15px; }
-        .case-card {
-            background: white;
-            border-radius: 20px;
-            padding: 15px;
-            text-align: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-        .case-icon { font-size: 40px; }
-        .spin-anim { font-size: 30px; font-weight: bold; color: #f39c12; margin: 10px 0; min-height: 40px;}
+        .case-card { background: white; border-radius: 20px; padding: 20px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 80%; max-width: 300px; }
+        .spin-anim { font-size: 24px; font-weight: bold; color: #f39c12; margin: 15px 0; min-height: 30px; }
 
-        /* Кнопки */
-        .btn {
-            background: var(--btn-blue);
-            color: white; border: none; padding: 10px 20px;
-            border-radius: 12px; font-weight: bold; cursor: pointer;
-        }
-        .btn:disabled { background: #ccc; }
-
-        /* Фильтры истории */
-        .filters { display: flex; gap: 10px; margin-bottom: 15px; }
-        .filter-btn { padding: 8px 15px; border-radius: 20px; border: 1px solid #ddd; background: white; cursor: pointer; }
-        .filte
-r-active { background: var(--btn-blue); color: white; border-color: var(--btn-blue); }
-
-        .history-list { width: 100%; }
-        .history-item { 
-            background: white; margin-bottom: 5px; padding: 10px; 
-            border-radius: 10px; display: flex; justify-content: space-between; 
-        }
+        /* Фильтры */
+        .filters { display: flex; gap: 8px; margin-bottom: 15px; }
+        .filter-btn { padding: 6px 12px; border-radius: 15px; border: 1px solid #ddd; background: white; font-size: 14px; }
+        .filter-btn.active { background: var(--btn-blue); color: white; border-color: var(--btn-blue); }
 
         /* Инвентарь */
-        .inventory-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
-        .inv-item { background: white; padding: 15px; border-radius: 15px; text-align: center; border: 2px solid gold; }
+        .inventory-item { background: white; padding: 15px; border-radius: 15px; margin-bottom: 10px; width: 90%; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+
+        /* История */
+        .history-item { background: white; padding: 10px; margin-bottom: 5px; border-radius: 8px; width: 95%; display: flex; justify-content: space-between; border-left: 4px solid #ccc; }
+        .win { border-left-color: var(--win-green);
+ }
+        .loss { border-left-color: var(--loss-red); }
 
         /* Навигация */
-        .nav { height: 70px; background: white; display: flex; border-top: 1px solid #eee; }
-        .nav-btn { flex: 1; border: none; background: none; font-size: 11px; color: #7f8c8d; cursor: pointer; }
-        .nav-btn.active { color: var(--btn-blue); font-weight: bold; }
-        .nav-btn span { display: block; font-size: 20px; }
+        .nav-bar { display: grid; grid-template-columns: repeat(4, 1fr); background: white; border-top: 1px solid #eee; }
+        .nav-item { padding: 12px 0; text-align: center; font-size: 22px; color: #bbb; cursor: pointer; }
+        .nav-item.active { color: var(--btn-blue); }
+
+        .btn { background: var(--btn-blue); color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div class="top-bar">✈️ <span id="score">0</span></div>
-
-    <!-- Кликер -->
-    <div id="scr-click" class="screen active-screen">
-        <div id="plane" onclick="clickPlane()">✈️</div>
-        <p>Лети выше!</p>
+<div class="top-bar">
+    <div class="balance-item">💰 <span id="balance">0</span></div>
+    <div class="stars-count" onclick="addStars()">
+        ⭐️ <span id="stars">0</span>
+        <button class="add-btn">+</button>
     </div>
+</div>
 
-    <!-- Магазин -->
-    <div id="scr-shop" class="screen">
-        <h3>Магазин Кейсов</h3>
-        <div class="shop-container">
-            <div class="case-card">
-                <div class="case-icon">🥉</div>
-                <b>Бронзовый (100)</b>
-                <div id="spin-bronze" class="spin-anim">- - -</div>
-                <button id="btn-bronze" class="btn" onclick="openCase('bronze')">ОТКРЫТЬ</button>
-            </div>
-            <div class="case-card">
-                <div class="case-icon">🥈</div>
-                <b>Серебряный (500)</b>
-                <div id="spin-silver" class="spin-anim">- - -</div>
-                <button id="btn-silver" class="btn" onclick="openCase('silver')">ОТКРЫТЬ</button>
-            </div>
-        </div>
+<div id="game-screen" class="screen active-screen">
+    <div id="plane">✈️</div>
+    <p>Кликай на самолёт!</p>
+</div>
+
+<div id="shop-screen" class="screen">
+    <h2>Магазин</h2>
+    <div class="case-card">
+        <div style="font-size: 50px;">🥈</div>
+        <h3>Серебряный кейс</h3>
+        <p>Цена: 500 💰</p>
+        <div id="case-result" class="spin-anim">???</div>
+        <button class="btn" onclick="openCase()">Открыть за 500</button>
     </div>
+</div>
 
-    <!-- История -->
-    <div id="scr-hist" class="screen">
-        <h3>История Игр</h3>
-        <div class="filters">
-            <button id="f-win" class="filter-btn" onclick="setFilter('win')">Победы</button>
-            <button id="f-loss" class="filter-btn" onclick="setFilter('loss')">Проигрыши</button>
-            <button id="f-all" class="filter-btn filter-active" onclick="setFilter('all')">Все</button>
-        </div>
-        <div id="hist-content" class="history-list"></div>
+<div id="history-screen" class="screen">
+    <h2>История</h2>
+    <div class="filters">
+        <button class="filter-btn active" onclick="setFilter('all', this)">Все</button>
+        <button class="filter-btn" onclick="setFilter('win', this)">Победы</button>
+        <button class="filter-btn" onclick="setFilter('loss', this)">Проигрыши</button>
     </div>
+    <div id="history-list" style="width: 100%;"></div>
+</div>
 
-    <!-- Инвентарь -->
-    <div id="scr-inv" class="screen">
-        <h3>Мой Инвентарь</h3>
-        <div id="inv-grid" class="inventory-grid"></div>
-    </div>
+<div id="inventory-screen" class="screen">
+    <h2>Инвентарь</h2>
+    <div id="inventory-list" style="width: 100%;"></div>
+</div>
 
-    <!-- Навигация -->
-    <div class="nav">
-        <button class="nav-btn active" onclick="nav('scr-click', this)"><span>🕹️</span>ИГРА</button>
-        <button class="nav-btn" onclick="nav('scr-shop', this)"><span>🛒</span>М�
-�ГАЗИН</button>
-        <button class="nav-btn" onclick="nav('scr-hist', this)"><span>📜</span>ИСТОРИЯ</button>
-        <button class="nav-btn" onclick="nav('scr-inv', this)"><span>📦</span>ИНВЕНТАРЬ</button>
-    </div>
+<nav class="nav-bar">
+    <div class="nav-item active" onclick="showScreen('game-screen', this)">✈️</div>
+    <div class="nav-item" onclick="showScreen('shop-screen', this)">🛒</div>
+    <div class="nav-item" onclick="showScreen('history-screen', this)">📜</div>
+    <div class="nav-item" onclick="showScreen('inventory-screen', this)">🎒</div>
+</nav>
 
-    <script>
-        let score = parseInt(localStorage.getItem('sk_score')) || 0;
-        let history = JSON.parse(localStorage.getItem('sk_hist')) || [];
-        let items = JSON.parse(localStorage.getItem('sk_inv')) || [];
-        let currentFilter = 'all';
+<script>
+    let score = parseInt(localStorage.getItem('score')) || 0;
+    let stars = parseInt(localStorage.getItem('stars')) || 0;
+    let history = JSON.parse(localStorage.getItem('history')) || [];
+    let inventory = JSON.parse(localStorage.getItem('inventory')) || [];
+    let currentFilter = 'all';
 
-        function updateUI() {
-            document.getElementById('score').innerText = score;
-            document.getElementById('btn-bronze').disabled = score < 100;
-            document.getElementById('btn-silver').disabled = score < 500;
-            save();
-        }
+    function updateDisplay() {
+        document.getElementById('balance').innerText = score;
+        document.getElementById('stars').innerText = stars;
+        localStorage.setItem('score', score);
+        localStorage.setItem('stars', stars);
+        localStorage.setItem('history', JSON.stringify(history));
+        localStorage.setItem('inventory', JSON.stringify(inventory));
+    }
 
-        function save() {
-            localStorage.setItem('sk_score', score);
-            localStorage.setItem('sk_hist', JSON.stringify(history));
-            localStorage.setItem('sk_inv', JSON.stringify(items));
-        }
-
-        function clickPlane() {
-            score++;
-            updateUI();
-        }
-
-        function openCase(type) {
-            const cost = type === 'bronze' ? 100 : 500;
-            if (score < cost) return;
-            
-            score -= cost;
-            updateUI();
-            
-            const spinEl = document.getElementById('spin-' + type);
-            let steps = 0;
-            const interval = setInterval(() => {
-                spinEl.innerText = Math.floor(Math.random() * 1000);
-                steps++;
-                if (steps > 15) {
-                    clearInterval(interval);
-                    finalizeCase(type, cost);
-                }
-            }, 80);
-        }
-
-        function finalizeCase(type, cost) {
-            let win = 0;
-            let gotBear = false;
-
-            if (type === 'bronze') {
-                const rand = Math.random();
-                if (rand > 0.9) win = 300;
-                else if (rand > 0.5) win = 120;
-                else win = 20;
+    // Пополнение звезд
+    function addStars() {
+        const amount = prompt("Курс: 1 звезда =
+1000 очков. Сколько звезд купить?", "1");
+        if (amount && !isNaN(amount)) {
+            const cost = amount * 1000;
+            if (score >= cost) {
+                score -= cost;
+                stars += parseInt(amount);
+                alert(`Вы купили ${amount} ⭐️`);
+                updateDisplay();
             } else {
-                // Серебряный: от 100 до 1000 с шагом 100
-                const prizes = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000];
-                win = prizes[Math.floor(Math.random() * prizes.length)];
-                if (win === 1000) {
-                    gotBear = true;
-                }
+                alert("Недостаточно очков (💰) для покупки звезд!");
             }
+        }
+    }
 
-            if (gotBear) {
-                items.push({ name: "Золотой Мишка", icon: "🧸", date: new Date().toLocaleDateString() });
-                document.getElementById('spin-' + type).innerText = "🧸 МИШКА!";
-            } else {
-                score += win;
-                document.getElementById('spin-' + type).innerText = "+" + win;
+    document.getElementById('plane').onclick = () => {
+        score += 10;
+        updateDisplay();
+    };
+
+    function showScreen(id, el) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.getElementById(id).classList.add('active-screen');
+        el.classList.add('active');
+        if(id === 'history-screen') renderHistory();
+        if(id === 'inventory-screen') renderInventory();
+    }
+
+    function openCase() {
+        if (score < 500) return alert('Нужно 500 💰');
+        score -= 500;
+        const res = document.getElementById('case-result');
+        res.innerText = "🌀 Ждём...";
+        
+        setTimeout(() => {
+            const win = Math.floor(Math.random() * 10 + 1) * 100;
+            score += win;
+            if (win === 1000 && !inventory.includes('Золотой мишка 🧸')) {
+                inventory.push('Золотой мишка 🧸');
             }
+            res.innerText = `+${win} 💰`;
+            history.unshift({ type: win >= 500 ? 'win' : 'loss', amount: win, date: new Date().toLocaleTimeString() });
+            updateDisplay();
+        }, 800);
+    }
 
-            const profit = win - cost;
-            history.unshift({
-                type: type === 'bronze' ? 'Бронза' : 'Серебро',
-                win: win,
-                profit: profit,
-                isWin: profit > 0,
-                bear: gotBear
-            });
+    function setFilter(f, btn) {
+        currentFilter = f;
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderHistory();
+    }
 
-            updateUI();
-        }
+    function renderHistory() {
+        const list = document.getElementById('history-list');
+        list.innerHTML = history
+            .filter(item => currentFilter === 'all' || item.type === currentFilter)
+            .map(item => `<div class="history-item ${item.type}"><span>${item.amount} 💰</span><span>${item.date}</span></div>`)
+            .join('');
+    }
 
-        function setFilter(f) {
-            currentFilter = f;
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('filter-active'));
-            document.getElementById('f-' + f).classList.add('filter-active');
-            renderHistory();
-        }
+    function renderInventory() {
+        const list = document.getElementById('inventory-list');
+        list.innerHTML = inventory.length 
+            ? inventory.map(i => `<div class="inventory-item"><h3>${i}</h3></div>`).join('')
+            : '<center>Пусто</center>';
+    }
 
-        function renderHistory() {
-            const container = document.getElementById('hist-content');
-            let filtered = history;
-            if (currentFilter === 'win') filtered = history.filter(h => h.isWin);
-            if (currentFilter === 'loss') filtered = history.filter(h => !h.isWin);
-
-            container.innerHTML = filtered.map(
-h => `
-                <div class="history-item">
-                    <span>${h.type}</span>
-                    <span style="color:${h.isWin ? 'green' : 'red'}">
-                        ${h.bear ? '🧸' : h.win + ' ✈️'} (${h.profit >= 0 ? '+' : ''}${h.profit})
-                    </span>
-                </div>
-            `).join('');
-        }
-
-        function renderInventory() {
-            const container = document.getElementById('inv-grid');
-            if (items.length === 0) {
-                container.innerHTML = "<p>Тут пока пусто...</p>";
-                return;
-            }
-            container.innerHTML = items.map(i => `
-                <div class="inv-item">
-                    <div style="font-size:40px">${i.icon}</div>
-                    <div style="font-size:12px">${i.name}</div>
-                </div>
-            `).join('');
-        }
-
-        function nav(id, btn) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(id).classList.add('active-screen');
-            btn.classList.add('active');
-            if (id === 'scr-hist') renderHistory();
-            if (id === 'scr-inv') renderInventory();
-        }
-
-        updateUI();
-    </script>
+    updateDisplay();
+</script>
 </body>
 </html>
