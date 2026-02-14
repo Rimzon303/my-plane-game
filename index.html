@@ -1,38 +1,71 @@
 
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVO Airline Clicker</title>
     <style>
-        body { background: #1c1c1c; color: white; text-align: center; font-family: sans-serif; }
-        #app { margin-top: 50px; }
-        .plane { font-size: 50px; position: relative; transition: 0.5s; cursor: pointer; }
-        button { padding: 10px 20px; background: #0088cc; color: white; border: none; border-radius: 10px; }
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f8ff;
+            /* Запрет выделения текста при кликах */
+            user-select: none; 
+        }
+
+        #score-container {
+            font-size: 32px; /* Увеличенный шрифт очков */
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        #plane-clicker {
+            font-size: 120px; /* Очень большой самолет */
+            cursor: pointer;
+            transition: transform 0.1s ease;
+            display: inline-block;
+        }
+
+        /* Эффект нажатия (самолет немного уменьшается) */
+        #plane-clicker:active {
+            transform: scale(0.9);
+        }
+
+        .label-text {
+            font-size: 24px; /* Увеличенный шрифт подписи */
+            margin-top: 10px;
+            color: #555;
+        }
     </style>
 </head>
 <body>
-    <div id="app">
-        <h1>Кликни на самолёт!</h1>
-        <div id="score">Счет: 0</div>
-        &l
-t;div id="plane" class="plane">✈️</div>
+
+    <div id="score-container">
+        Очки: <span id="score">0</span>
     </div>
+
+    <!-- Кликабельный эмодзи самолета -->
+    <div id="plane-clicker">✈️</div>
+
+    <div class="label-text">Нажимай на самолёт!</div>
 
     <script>
         let score = 0;
-        const plane = document.getElementById('plane');
-        const scoreBoard = document.getElementById('score');
+        const scoreElement = document.getElementById('score');
+        const planeElement = document.getElementById('plane-clicker');
 
-        plane.addEventListener('click', () => {
+        // Функция обработки клика
+        planeElement.onclick = function() {
             score++;
-            scoreBoard.innerText = "Счет: " + score;
-            // Случайное перемещение
-            plane.style.left = Math.random() * 50 + "px";
-            plane.style.top = Math.random() * 50 + "px";
-        });
-        
-        // Сообщаем Telegram, что приложение готово
-        Telegram.WebApp.ready();
+            scoreElement.innerText = score;
+        };
     </script>
 </body>
 </html>
