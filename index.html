@@ -4,173 +4,277 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SVO Clicker Store</title>
+    <title>Sky Clicker & Shop</title>
     <style>
+        :root {
+            --sky-blue: #87CEEB;
+            --deep-blue: #00BFFF;
+            --cloud-white: #f0faff;
+            --text-dark: #2c3e50;
+        }
+
         body {
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
+            padding: 0;
+            background: linear-gradient(180deg, var(--sky-blue) 0%, #fff 100%);
+            height: 100vh;
             display: flex;
             flex-direction: column;
-            height: 100vh;
-            background-color: #f0f4f8;
-            user-select: none;
             overflow: hidden;
+            color: var(--text-dark);
         }
 
         /* Экраны */
-        .screen { display: none; flex-direction: column; align-items: center; justify-content: center; flex-grow: 1; }
-        .active { display: flex; }
+        .screen {
+            flex: 1;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .active-screen { display: flex; }
 
-        /* Счет */
-        #score-display { font-size: 36px; font-weight: bold; margin-bottom: 20px; color: #2c3e50; }
+        /* Верхняя панель счета */
+        .top-bar {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 15px;
+            text-align: center;
+            font-size: 28px;
+            font-weight: 800;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
 
         /* Кликер */
-        #plane-clicker { font-size: 150px; cursor: pointer; transition: transform 0.1s; }
-        #plane-clicker:active { transform: scale(0.9); }
+        .clicker-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        #plane {
+            font-size: 120px;
+            cursor: pointer;
+            transition: transform 0.1s;
+            filter: drop-shadow(0 10px 10px rgba(0,0,0,0.1));
+        }
+        #plane:active { transform: scale(0.9) rotate(-5deg); }
 
         /* Магазин */
-        .chest-card {
+        .shop-item {
             background: white;
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 25px;
+            border-radius: 25px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
             text-align: center;
+            width: 80%;
+            margin-top: 50px;
         }
-        .chest-icon { font-size: 80px; margin-bottom: 10px; }
+        .chest-img { font-size: 60px; margin-bottom: 15px; }
+        .spin-value { 
+            font-size: 40px; 
+            font-weight: bold; 
+            color: #d35400; 
+            height: 50px; 
+            margin: 15px 0;
+        }
         .btn-buy {
-            background: #27ae60;
+            background: var(--deep-blue);
             color: white;
             border: none;
-            padding: 15px 30px;
-            font-size: 20px;
-            border-radius: 10px;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: bold;
             cursor: pointer;
         }
-        .btn-buy:disabled { background: #95a5a6; }
+        .btn-buy:disabled { background: #bdc3c7; }
 
-        /* Рулетка */
-        #roulette {
-            font-size: 40px;
-            height: 60px;
-            font-weight: bold;
-            color: #e67e22;
-            margin: 20px 0;
+        /* История */
+        .history-list {
+            width: 100%;
+            max-width: 400px;
+            list-style: none;
+            padding: 0;
         }
+        .history-item {
+            background: white;
+            margin-bottom: 8px;
+            padding: 12px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .win { color: #27ae60; font-weight: bold; }
+        .loss { color: #e74c3c; font-weight: bold; }
 
         /* Навигация */
-        nav {
+        .nav-bar {
+            height: 80px;
+    background: white;
             display: flex;
-            background: #ffffff;
-            border-top: 2px solid #ddd;
-            height: 70px;
+            border-top: 1px solid #ddd;
         }
-        .nav-btn {
+        .nav-item {
             flex: 1;
             border: none;
             background: none;
-            font-size: 18px;
+            font-size: 14px;
             font-weight: bold;
             color: #7f8c8d;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
         }
-        .nav-btn.active-nav { color: #3498db; border-top: 4px solid #3498db; }
+        .nav-item.active-nav { color: var(--deep-blue); }
+        .nav-icon { font-size: 24px; }
     </style>
 </head>
 <body>
 
-    <!-- Экран Кликера -->
-    <div id="clicker-screen" class="screen active">
-        <div id="score-display">0 ✈️</div>
-        <div id="plane-clicker">✈️</div>
-        <p style="font-size: 20px;">Нажимай на взлет!</p>
+    <div class="top-bar">
+        ✈️ <span id="score">0</span>
     </div>
 
-    <!-- Экран Магазина -->
-    <div id="shop-screen" class="screen">
-        <div class="chest-card">
-            <div class="chest-icon">📦</div>
-            <div style="font-size: 24px; font-weight: bold;">Бронзовый сундук</div>
-            <div style="margin: 10px 0; color: #7f8c8d;">Цена: 100 ✈️</div>
-            <div id="roulette">?</div>
-            <button id="buy-chest" class="btn-buy" onclick="openChest()">Открыть</button>
+    <!-- Кликер -->
+    <div id="clicker-scr" class="screen active-screen">
+        <div class="clicker-container">
+            <div id="plane" onclick="doClick()">✈️</div>
+            <p>Нажимай, чтобы лететь!</p>
         </div>
-    </div&g
-t;
+    </div>
 
-    <!-- Нижнее меню -->
-    <nav>
-        <button id="nav-clicker" class="nav-btn active-nav" onclick="showScreen('clicker')">КЛИКЕР</button>
-        <button id="nav-shop" class="nav-btn" onclick="showScreen('shop')">МАГАЗИН</button>
-    </nav>
+    <!-- Магазин -->
+    <div id="shop-scr" class="screen">
+        <h2>Магазин</h2>
+        <div class="shop-item">
+            <div class="chest-img">📦</div>
+            <h3>Бронзовый сундук</h3>
+            <p>Цена: 100 ✈️</p>
+            <div id="roulette-val" class="spin-value">?</div>
+            <button id="buy-btn" class="btn-buy" onclick="buyChest()">ОТКРЫТЬ</button>
+        </div>
+    </div>
+
+    <!-- История -->
+    <div id="history-scr" class="screen">
+        <h2>История полетов</h2>
+        <div id="history-list" class="history-list">
+            <!-- Сюда падают записи -->
+        </div>
+    </div>
+
+    <!-- Навигация -->
+    <div class="nav-bar">
+        <button class="nav-item active-nav" onclick="showScr('clicker-scr', this)">
+            <span class="nav-icon">🕹️</span>КЛИКЕР
+        </button>
+        <button class="nav-item" onclick="showScr('shop-scr', this)">
+            <span class="nav-icon">🛒</span>МАГАЗИН
+        </button>
+        <button class="nav-item" onclick="showScr('history-scr', this)">
+            <span class="nav-icon">📜</span>ИСТОРИЯ
+        </button>
+    </div>
 
     <script>
-        let score = 0;
+        let score = parseInt(localStorage.getItem('skyScore')) || 0;
+        let history = JSON.parse(localStorage.getItem('skyHistory')) || [];
         let isSpinning = false;
 
         function updateUI() {
-            document.getElementById('score-display').innerText = score + " ✈️";
-            const buyBtn = document.getElementById('buy-chest');
-            buyBtn.disabled = score < 100 || isSpinning;
+            document.getElementById('score').innerText = score;
+            document.getElementById('buy-btn').disabled = (score < 100 || isSpinning);
+            saveData();
         }
 
-        // Клик по самолету
-        document.getElementById('plane-clicker').onclick = () => {
+        function saveData() {
+            localStorage.setItem('skyScore', score);
+            localStorage.setItem('skyHistory', JSON.stringify(history));
+        }
+
+        function doClick() {
             score++;
             updateUI();
-        };
-
-        // Переключение экранов
-        function showScreen(type) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active-nav'));
-            
-            if(type === 'clicker') {
-                document.getElementById('clicker-screen').classList.add('active');
-                document.getElementById('nav-clicker').classList.add('active-nav');
-            } else {
-                document.getElementById('shop-screen').classList.add('active');
-                document.getElementById('nav-shop').classList.add('active-nav');
-                updateUI();
-            }
         }
 
-        // Логика сундука
-        function openChest() {
+        function showScr(id, btn) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
+            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active-nav'));
+            document.getElementById(id).classList.add('active-screen');
+            btn.classList.add('active-nav');
+            if(id === 'history-scr') renderHistory();
+ updateUI();
+        }
+
+        function buyChest() {
             if (score < 100 || isSpinning) return;
 
             score -= 100;
             isSpinning = true;
             updateUI();
 
-            const roulette = document.getElementById('roulette');
-            let iterations = 0;
+            let counter = 0;
+            const roul = document.getElementById('roulette-val');
             
-            // Анимация вращения
             const interval = setInterval(() => {
-                roulette.innerText = Math.floor(Math.random() * 50) * 10 + 10;
-                iterations++;
-                
-                if (iterations > 20) {
+                roul.innerText = Math.floor(Math.random() * 50) * 10 + 10;
+                counter++;
+                if (counter > 15) {
                     clearInterval(interval);
-                    finalizeWin();
+                    finishSpin();
                 }
-            }, 100);
+            }, 80);
         }
 
-        function finalizeWin() {
-            // Шансы: генерируем число от 0 до 1
-            // Чем выше награда, тем меньше вероятность (экспоненциальное распределение)
-            const random = Math.pow(Math.random(), 2); // Смещение в сторону меньших чисел
-            let win = Math.floor(random * 50) * 10 + 10;
+        function finishSpin() {
+            // Шансы: чем выше число, тем меньше шанс
+            const rand = Math.random();
+            let win;
             
-            // Гарантируем шаг 10 и диапазон 10-500
-            win = Math.max(10, Math.min(500, win));
-            
-            document.getElementById('roulette').innerText = "+" + win;
+            if (rand > 0.95) win = 500;
+            else if (rand > 0.85) win = 300;
+            else if (rand > 0.70) win = 150;
+            else if (rand > 0.40) win = 50;
+            else win = 10;
+
+            document.getElementById('roulette-val').innerText = "+" + win;
             score += win;
+            
+            // Запись в историю
+            const profit = win - 100;
+            const status = profit >= 0 ? "Выигрыш" : "Проигрыш";
+            history.unshift({
+                date: new Date().toLocaleTimeString(),
+                amount: win,
+                profit: profit
+            });
+            
+            if (history.length > 20) history.pop();
+            
             isSpinning = false;
             updateUI();
         }
+
+        function renderHistory() {
+            const container = document.getElementById('history-list');
+            container.innerHTML = history.map(item => `
+                <div class="history-item">
+                    <span>${item.date} — Сундук</span>
+                    <span class="${item.profit >= 0 ? 'win' : 'loss'}">
+                        ${item.amount} ✈️ (${item.profit >= 0 ? '+' : ''}${item.profit})
+                    </span>
+                </div>
+            `).join('');
+        }
+
+        // Инициализация при запуске
+        updateUI();
     </script>
 </body>
 </html>
