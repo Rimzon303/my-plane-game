@@ -4,212 +4,227 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sky World Explorer</title>
+    <title>Sky Explorer Pro</title>
     <style>
         :root {
-            --sky-blue: #A2D9FF;
-            --btn-blue: #3498db;
-            --win-green: #2ecc71;
-            --loss-red: #e74c3c;
-            --star-gold: #f1c40f;
+            --sky-color: #2980b9;
+            --accent: #f1c40f;
+            --bg: #ecf0f1;
+            --text: #2c3e50;
         }
 
         body {
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
-            background: linear-gradient(180deg, var(--sky-blue) 0%, #ffffff 100%);
-            height: 100vh;
+            background: var(--bg);
+            color: var(--text);
             display: flex;
             flex-direction: column;
+            height: 100vh;
             overflow: hidden;
             user-select: none;
-            -webkit-user-select: none;
         }
 
-        /* Верхняя панель со Звездами и Очками */
-        .top-bar {
-            background: rgba(255, 255, 255, 0.9);
-            padding: 10px 15px;
+        /* Шапка с валютой */
+        .header {
+            background: white;
+            padding: 15px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            z-index: 100;
+            z-index: 10;
         }
 
-        .balance-item { font-size: 18px; font-weight: bold; }
-        .stars-count { color: #f39c12; background: #fef5e7; padding: 5px 12px; border-radius: 15px; display: flex; align-items: center; cursor: pointer; }
-        .add-btn { margin-left: 8px; background: #f39c12; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-weight: bold; cursor: pointer; line-height: 20px; text-align: center; font-size: 14px; }
+        .stat { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 1.1rem; }
+        .stars-box { background: #fdf2a9; padding: 5px 12px; border-radius: 12px; border: 1px solid #f1c40f; position: relative; }
+        .add-star-btn { 
+            background: #e67e22; border: none; color: white; border-radius: 50%; 
+            width: 24px; height: 24px; cursor: pointer; font-weight: bold; margin-left: 5px;
+        }
 
-        .screen { flex: 1; display: none; flex-direction: column; align-items: center; padding: 15px; overflow-y: auto; }
+        /* Экраны */
+        .screen { flex: 1; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
         .active-screen { display: flex; }
 
-        /* Самолет */
-        #plane { font-size: 100px; margin-top: 50px; cursor: pointer; transition: transform 0.05s; -webkit-tap-highlight-color: transparent; }
-        #plane:active { transform: scale(0.85); }
+        /* Игровой процесс */
+        #game-area { background: linear-gradient(to bottom, #3498db, #87ceeb); width: 100%; position: relative; }
+        #plane { 
+            font-size: 100px; cursor: pointer; transition: transform 0.1s; 
+            filter: drop-shadow(0 10px 10px rgba(0,0,0,0.2)); 
+            -webkit-tap-highlight-color: transparent;
+        }
+        #plane:active { transform: scale(0.85) rotate(-5deg); }
 
         /* Магазин */
-        .case-card { background: white; border-radius: 20px; padding: 20px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 80%; max-width: 300px; }
-        .spin-anim { font-size: 24px; font-weight: bold; color: #f39c12; margin: 15px 0; min-height: 30px; }
-
-        /* Фильтры */
-        .filters { display: flex; gap: 8px; margin-bottom: 15px; }
-        .filter-btn { padding: 6px 12px; border-radius: 15px; border: 1px solid #ddd; background: white; font-size: 14px; }
-        .filter-btn.active { background: var(--btn-blue); color: white; border-color: var(--btn-blue); }
-
-        /* Инвентарь */
-        .inventory-item { background: white; padding: 15px; border-radius: 15px; margin-bottom: 10px; width: 90%; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-
-        /* История */
-        .history-item { background: white; padding: 10px; margin-bottom: 5px; border-radius: 8px; width: 95%; display: flex; justify-content: space-between; border-left: 4px solid #ccc; }
-        .win { border-left-color: var(--win-green);
- }
-        .loss { border-left-color: var(--loss-red); }
+        .shop-list { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 15px; }
+        .shop-item {
+            background: white; padding: 15px; border-radius: 12px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .shop-item button { 
+            background: var(--sky-color); color: white; border: none; 
+            padding: 10px 15px; border-radius: 8px; cursor: pointer;
+        }
+        .shop-item button:disabled { background: #bdc3c7; }
 
         /* Навигация */
-        .nav-bar { display: grid; grid-template-columns: repeat(4, 1fr); background: white; border-top: 1px solid #eee; }
-        .nav-item { padding: 12px 0; text-align: center; font-size: 22px; color: #bbb; cursor: pointer; }
-        .nav-item.active { color: var(--btn-blue); }
-
-        .btn { background: var(--btn-blue); color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: bold; }
+        .nav { background: white; display: flex; border-top: 1px solid #ddd; height: 70px; }
+        .nav-btn { 
+            flex: 1; display: flex; flex-direction: column; 
+            align-items: center; justify-content: center; cursor: pointer; opacity: 0.5;
+        }
+        .nav-btn.active { opacity: 1; color: var(--sky-color); border-top: 3px solid var(--sky-color); }
+        .nav-btn span { font-size: 24px; }
+        .nav-btn label { font-size: 12px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div class="top-bar">
-    <div class="balance-item">💰 <span id="balance">0</span></div>
-    <div class="stars-count" onclick="addStars()">
+<div class="header">
+    <div class=
+"stat">💰 <span id="balance">0</span></div>
+    <div class="stat stars-box">
         ⭐️ <span id="stars">0</span>
-        <button class="add-btn">+</button>
+        <button class="add-star-btn" onclick="openStarShop()">+</button>
     </div>
 </div>
 
-<div id="game-screen" class="screen active-screen">
-    <div id="plane">✈️</div>
-    <p>Кликай на самолёт!</p>
+<!-- Игровой экран -->
+<div id="game" class="screen active-screen">
+    <div id="plane" onclick="clickPlane()">✈️</div>
+    <p style="color: white; font-weight: bold; margin-top: 20px;">Кликай на самолет!</p>
 </div>
 
-<div id="shop-screen" class="screen">
-    <h2>Магазин</h2>
-    <div class="case-card">
-        <div style="font-size: 50px;">🥈</div>
-        <h3>Серебряный кейс</h3>
-        <p>Цена: 500 💰</p>
-        <div id="case-result" class="spin-anim">???</div>
-        <button class="btn" onclick="openCase()">Открыть за 500</button>
+<!-- Экран Магазина -->
+<div id="shop" class="screen">
+    <h2>Улучшения</h2>
+    <div class="shop-list">
+        <div class="shop-item">
+            <div>
+                <b>Мощный двигатель</b><br>
+                <small>+1 за каждый клик</small>
+            </div>
+            <button id="upg-click" onclick="buyUpgrade('click')">500 💰</button>
+        </div>
+        <div class="shop-item">
+            <div>
+                <b>Автопилот</b><br>
+                <small>+5💰 каждую секунду</small>
+            </div>
+            <button id="upg-auto" onclick="buyUpgrade('auto')">1500 💰</button>
+        </div>
     </div>
 </div>
 
-<div id="history-screen" class="screen">
-    <h2>История</h2>
-    <div class="filters">
-        <button class="filter-btn active" onclick="setFilter('all', this)">Все</button>
-        <button class="filter-btn" onclick="setFilter('win', this)">Победы</button>
-        <button class="filter-btn" onclick="setFilter('loss', this)">Проигрыши</button>
+<nav class="nav">
+    <div class="nav-btn active" onclick="showScreen('game', this)">
+        <span>✈️</span><label>Полет</label>
     </div>
-    <div id="history-list" style="width: 100%;"></div>
-</div>
-
-<div id="inventory-screen" class="screen">
-    <h2>Инвентарь</h2>
-    <div id="inventory-list" style="width: 100%;"></div>
-</div>
-
-<nav class="nav-bar">
-    <div class="nav-item active" onclick="showScreen('game-screen', this)">✈️</div>
-    <div class="nav-item" onclick="showScreen('shop-screen', this)">🛒</div>
-    <div class="nav-item" onclick="showScreen('history-screen', this)">📜</div>
-    <div class="nav-item" onclick="showScreen('inventory-screen', this)">🎒</div>
+    <div class="nav-btn" onclick="showScreen('shop', this)">
+        <span>🛒</span><label>Рынок</label>
+    </div>
 </nav>
 
 <script>
-    let score = parseInt(localStorage.getItem('score')) || 0;
-    let stars = parseInt(localStorage.getItem('stars')) || 0;
-    let history = JSON.parse(localStorage.getItem('history')) || [];
-    let inventory = JSON.parse(localStorage.getItem('inventory')) || [];
-    let currentFilter = 'all';
+    // --- ДАННЫЕ ИГРЫ ---
+    let state = {
+        money: 0,
+        stars: 0,
+        clickPower: 1,
+        income: 0,
+        costs: {
+            click: 500,
+            auto: 1500
+        }
+    };
 
-    function updateDisplay() {
-        document.getElementById('balance').innerText = score;
-        document.getElementById('stars').innerText = stars;
-        localStorage.setItem('score', score);
-        localStorage.setItem('stars', stars);
-        localStorage.setItem('history', JSON.stringify(history));
-        localStorage.setItem('inventory', JSON.stringify(inventory));
+    // --- ЗАГРУЗКА ---
+    function loadGame() {
+        const saved = localStorage.getItem('skyExplorerData');
+        if (saved) {
+            state = JSON.parse(saved);
+        }
+        updateUI();
     }
 
-    // Пополнение звезд
-    function addStars() {
-        const amount = prompt("Курс: 1 звезда =
-1000 очков. Сколько звезд купить?", "1");
-        if (amount && !isNaN(amount)) {
-            const cost = amount * 1000;
-            if (score >= cost) {
-                score -= cost;
-                stars += parseInt(amount);
-                alert(`Вы купили ${amount} ⭐️`);
-                updateDisplay();
+    // --- СОХРАНЕНИЕ ---
+    function saveGame() {
+        localStorage.setItem('skyExplorerData', JSON.stringify(state));
+    }
+
+    // --- ОБНОВЛЕНИЕ ИНТЕРФЕЙСА ---
+    function updateUI() {
+        document.getElementById('balance').textContent = Math.floor(state.money);
+        document.getElementById('stars').textContent = state.stars;
+        document.getElementById('upg-click').textContent = state.costs.click + " 💰";
+        document.getElementById('upg-auto').textContent = state.costs.auto + " 💰";
+        
+        // Блокировка кнопок, если нет денег
+        document.getElementById('upg-click').disabled = state.money < state.costs.click;
+        document.getElementById('upg-auto').disabled = state.money < state.costs.auto;
+    }
+
+    // --- ЛОГИКА КЛИКА ---
+    function clickPlane() {
+        state.money += state.clickPower;
+        updateUI();
+    }
+
+    // --- МАГАЗИН ЗВЕЗД ---
+    function openStarShop() {
+        let amount = prompt("Купить Звезды? (1 ⭐️ = 10,000💰)\nВведите количество:", "1");
+        if (amount) {
+            let qty = parseInt(amount);
+            if (qty > 0 && state.money >= qty * 10000) {
+                state.money -= qty * 10000;
+                state.st
+ars += qty;
+                alert("Успешно куплено!");
             } else {
-                alert("Недостаточно очков (💰) для покупки звезд!");
+                alert("Не хватает денег или неверное число!");
             }
+            updateUI();
+            saveGame();
         }
     }
 
-    document.getElementById('plane').onclick = () => {
-        score += 10;
-        updateDisplay();
-    };
+    // --- ПОКУПКА УЛУЧШЕНИЙ ---
+    function buyUpgrade(type) {
+        if (type === 'click' && state.money >= state.costs.click) {
+            state.money -= state.costs.click;
+            state.clickPower += 1;
+            state.costs.click = Math.floor(state.costs.click * 1.5);
+        } else if (type === 'auto' && state.money >= state.costs.auto) {
+            state.money -= state.costs.auto;
+            state.income += 5;
+            state.costs.auto = Math.floor(state.costs.auto * 1.6);
+        }
+        updateUI();
+        saveGame();
+    }
 
+    // --- АВТО-ДОХОД (раз в секунду) ---
+    setInterval(() => {
+        if (state.income > 0) {
+            state.money += state.income;
+            updateUI();
+            saveGame();
+        }
+    }, 1000);
+
+    // --- НАВИГАЦИЯ ---
     function showScreen(id, el) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(id).classList.add('active-screen');
         el.classList.add('active');
-        if(id === 'history-screen') renderHistory();
-        if(id === 'inventory-screen') renderInventory();
     }
 
-    function openCase() {
-        if (score < 500) return alert('Нужно 500 💰');
-        score -= 500;
-        const res = document.getElementById('case-result');
-        res.innerText = "🌀 Ждём...";
-        
-        setTimeout(() => {
-            const win = Math.floor(Math.random() * 10 + 1) * 100;
-            score += win;
-            if (win === 1000 && !inventory.includes('Золотой мишка 🧸')) {
-                inventory.push('Золотой мишка 🧸');
-            }
-            res.innerText = `+${win} 💰`;
-            history.unshift({ type: win >= 500 ? 'win' : 'loss', amount: win, date: new Date().toLocaleTimeString() });
-            updateDisplay();
-        }, 800);
-    }
-
-    function setFilter(f, btn) {
-        currentFilter = f;
-        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        renderHistory();
-    }
-
-    function renderHistory() {
-        const list = document.getElementById('history-list');
-        list.innerHTML = history
-            .filter(item => currentFilter === 'all' || item.type === currentFilter)
-            .map(item => `<div class="history-item ${item.type}"><span>${item.amount} 💰</span><span>${item.date}</span></div>`)
-            .join('');
-    }
-
-    function renderInventory() {
-        const list = document.getElementById('inventory-list');
-        list.innerHTML = inventory.length 
-            ? inventory.map(i => `<div class="inventory-item"><h3>${i}</h3></div>`).join('')
-            : '<center>Пусто</center>';
-    }
-
-    updateDisplay();
+    // Запуск
+    loadGame();
 </script>
+
 </body>
 </html>
