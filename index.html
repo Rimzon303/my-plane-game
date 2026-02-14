@@ -1,0 +1,38 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { background: #1c1c1c; color: white; text-align: center; font-family: sans-serif; }
+        #app { margin-top: 50px; }
+        .plane { font-size: 50px; position: relative; transition: 0.5s; cursor: pointer; }
+        button { padding: 10px 20px; background: #0088cc; color: white; border: none; border-radius: 10px; }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <h1>Кликни на самолёт!</h1>
+        <div id="score">Счет: 0</div>
+        &l
+t;div id="plane" class="plane">✈️</div>
+    </div>
+
+    <script>
+        let score = 0;
+        const plane = document.getElementById('plane');
+        const scoreBoard = document.getElementById('score');
+
+        plane.addEventListener('click', () => {
+            score++;
+            scoreBoard.innerText = "Счет: " + score;
+            // Случайное перемещение
+            plane.style.left = Math.random() * 50 + "px";
+            plane.style.top = Math.random() * 50 + "px";
+        });
+        
+        // Сообщаем Telegram, что приложение готово
+        Telegram.WebApp.ready();
+    </script>
+</body>
+</html>
