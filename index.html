@@ -191,42 +191,60 @@ r-active { background: var(--btn-blue); color: white; border-color: var(--btn-bl
             }, 80);
         }
 
-        function finalizeCase(type, cost) {
-            let win = 0;
-            let gotBear = false;
+        
+function finalizeCase(type, cost) {
+    let win = 0;
+    let gotBear = false;
 
-            if (type === 'bronze') {
-                const rand = Math.random();
-                if (rand > 0.9) win = 300;
-                else if (rand > 0.5) win = 120;
-                else win = 20;
-            } else {
-                // Серебряный: от 100 до 1000 с шагом 100
-                const prizes = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000];
-                win = prizes[Math.floor(Math.random() * prizes.length)];
-                if (win === 1000) {
-                    gotBear = true;
-                }
-            }
+    if (type === 'bronze') {
+        const rand = Math.random();
+        if (rand > 0.95) win = 500; // Редкий джекпот
+        else if (rand > 0.7) win = 150;
+        else win = 30;
+    } else if (type === 'silver') {
+        // Выбираем случайное число из диапазона 100-1000 с шагом 100
+        const prizes = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000];
+        win = prizes[Math.floor(Math.random() * prizes.length)];
+        
+        // Математический шанс на мишку: 
+        // 1. Нужно чтобы выпало именно 1000 (шанс 1/10)
+        // 2. Дополнительный рандом 0.1 (шанс 1/10)
+        // Итоговый шанс: 1% (0.01)
+        if (win === 1000 && Math.random() < 0.1) {
+            gotBear = true;
+        }
+    }
 
-            if (gotBear) {
-                items.push({ name: "Золотой Мишка", icon: "🧸", date: new Date().toLocaleDateString() });
-                document.getElementById('spin-' + type).innerText = "🧸 МИШКА!";
-            } else {
-                score += win;
-                document.getElementById('spin-' + type).innerText = "+" + win;
-            }
+    const spinEl = document.getElementById('spin-' + type);
+    
+    if (gotBear) {
+        items.push({ 
+            name: "Золотой Мишка", 
+            icon: "🧸", 
+            date: new Date().toLocaleTimeString() 
+        });
+        spinEl.innerText = "⭐️ МИШКА! ⭐️";
+        spinEl.style.color = "#f1c40f";
+    } else {
+        score += win;
+        spinEl.innerText = "+" + win;
+        spinEl.style.color = win >= cost ? "#27ae60" : "#e74c3c";
+    }
 
-            const profit = win - cost;
-            history.unshift({
-                type: type === 'bronze' ? 'Бронза' : 'Серебро',
-                win: win,
-                profit: profit,
-                isWin: profit > 0,
-                bear: gotBear
-            });
+    // Логика истории
+    const profit = gotBear ? 500 : (win - cost); 
+    history.unshift({
+        type: type === 'bronze' ? 'Бронза' : 'Серебро',
+        win: gotBear ? '🧸' : win,
+        profit: profit,
+        isWin: profit > 0,
+        bear: gotBear
+    });
 
-            updateUI();
+    if (history.length > 50) history.pop(); // Оптимизация памяти
+    updateUI();
+}
+
         }
 
         function setFilter(f) {
