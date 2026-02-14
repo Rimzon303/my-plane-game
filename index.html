@@ -3,69 +3,174 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SVO Airline Clicker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SVO Clicker Store</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
             height: 100vh;
-            margin: 0;
-            background-color: #f0f8ff;
-            /* Запрет выделения текста при кликах */
-            user-select: none; 
+            background-color: #f0f4f8;
+            user-select: none;
+            overflow: hidden;
         }
 
-        #score-container {
-            font-size: 32px; /* Увеличенный шрифт очков */
-            font-weight: bold;
-            margin-bottom: 20px;
-            color: #333;
-        }
+        /* Экраны */
+        .screen { display: none; flex-direction: column; align-items: center; justify-content: center; flex-grow: 1; }
+        .active { display: flex; }
 
-        #plane-clicker {
-            font-size: 120px; /* Очень большой самолет */
+        /* Счет */
+        #score-display { font-size: 36px; font-weight: bold; margin-bottom: 20px; color: #2c3e50; }
+
+        /* Кликер */
+        #plane-clicker { font-size: 150px; cursor: pointer; transition: transform 0.1s; }
+        #plane-clicker:active { transform: scale(0.9); }
+
+        /* Магазин */
+        .chest-card {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .chest-icon { font-size: 80px; margin-bottom: 10px; }
+        .btn-buy {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 20px;
+            border-radius: 10px;
             cursor: pointer;
-            transition: transform 0.1s ease;
-            display: inline-block;
+        }
+        .btn-buy:disabled { background: #95a5a6; }
+
+        /* Рулетка */
+        #roulette {
+            font-size: 40px;
+            height: 60px;
+            font-weight: bold;
+            color: #e67e22;
+            margin: 20px 0;
         }
 
-        /* Эффект нажатия (самолет немного уменьшается) */
-        #plane-clicker:active {
-            transform: scale(0.9);
+        /* Навигация */
+        nav {
+            display: flex;
+            background: #ffffff;
+            border-top: 2px solid #ddd;
+            height: 70px;
         }
-
-        .label-text {
-            font-size: 24px; /* Увеличенный шрифт подписи */
-            margin-top: 10px;
-            color: #555;
+        .nav-btn {
+            flex: 1;
+            border: none;
+            background: none;
+            font-size: 18px;
+            font-weight: bold;
+            color: #7f8c8d;
+            cursor: pointer;
         }
+        .nav-btn.active-nav { color: #3498db; border-top: 4px solid #3498db; }
     </style>
 </head>
 <body>
 
-    <div id="score-container">
-        Очки: <span id="score">0</span>
+    <!-- Экран Кликера -->
+    <div id="clicker-screen" class="screen active">
+        <div id="score-display">0 ✈️</div>
+        <div id="plane-clicker">✈️</div>
+        <p style="font-size: 20px;">Нажимай на взлет!</p>
     </div>
 
-    <!-- Кликабельный эмодзи самолета -->
-    <div id="plane-clicker">✈️</div>
+    <!-- Экран Магазина -->
+    <div id="shop-screen" class="screen">
+        <div class="chest-card">
+            <div class="chest-icon">📦</div>
+            <div style="font-size: 24px; font-weight: bold;">Бронзовый сундук</div>
+            <div style="margin: 10px 0; color: #7f8c8d;">Цена: 100 ✈️</div>
+            <div id="roulette">?</div>
+            <button id="buy-chest" class="btn-buy" onclick="openChest()">Открыть</button>
+        </div>
+    </div&g
+t;
 
-    <div class="label-text">Нажимай на самолёт!</div>
+    <!-- Нижнее меню -->
+    <nav>
+        <button id="nav-clicker" class="nav-btn active-nav" onclick="showScreen('clicker')">КЛИКЕР</button>
+        <button id="nav-shop" class="nav-btn" onclick="showScreen('shop')">МАГАЗИН</button>
+    </nav>
 
     <script>
         let score = 0;
-        const scoreElement = document.getElementById('score');
-        const planeElement = document.getElementById('plane-clicker');
+        let isSpinning = false;
 
-        // Функция обработки клика
-        planeElement.onclick = function() {
+        function updateUI() {
+            document.getElementById('score-display').innerText = score + " ✈️";
+            const buyBtn = document.getElementById('buy-chest');
+            buyBtn.disabled = score < 100 || isSpinning;
+        }
+
+        // Клик по самолету
+        document.getElementById('plane-clicker').onclick = () => {
             score++;
-            scoreElement.innerText = score;
+            updateUI();
         };
+
+        // Переключение экранов
+        function showScreen(type) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active-nav'));
+            
+            if(type === 'clicker') {
+                document.getElementById('clicker-screen').classList.add('active');
+                document.getElementById('nav-clicker').classList.add('active-nav');
+            } else {
+                document.getElementById('shop-screen').classList.add('active');
+                document.getElementById('nav-shop').classList.add('active-nav');
+                updateUI();
+            }
+        }
+
+        // Логика сундука
+        function openChest() {
+            if (score < 100 || isSpinning) return;
+
+            score -= 100;
+            isSpinning = true;
+            updateUI();
+
+            const roulette = document.getElementById('roulette');
+            let iterations = 0;
+            
+            // Анимация вращения
+            const interval = setInterval(() => {
+                roulette.innerText = Math.floor(Math.random() * 50) * 10 + 10;
+                iterations++;
+                
+                if (iterations > 20) {
+                    clearInterval(interval);
+                    finalizeWin();
+                }
+            }, 100);
+        }
+
+        function finalizeWin() {
+            // Шансы: генерируем число от 0 до 1
+            // Чем выше награда, тем меньше вероятность (экспоненциальное распределение)
+            const random = Math.pow(Math.random(), 2); // Смещение в сторону меньших чисел
+            let win = Math.floor(random * 50) * 10 + 10;
+            
+            // Гарантируем шаг 10 и диапазон 10-500
+            win = Math.max(10, Math.min(500, win));
+            
+            document.getElementById('roulette').innerText = "+" + win;
+            score += win;
+            isSpinning = false;
+            updateUI();
+        }
     </script>
 </body>
 </html>
