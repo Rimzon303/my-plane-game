@@ -189,6 +189,29 @@ r-active { background: var(--btn-blue); color: white; border-color: var(--btn-bl
                 }
             }, 80);
         }
+        function getSilverReward(type, cost) 
+  const options = [
+    { v: 100, w: 5 },   // больший шанс на 100
+    { v: 200, w: 1 },
+    { v: 300, w: 1 },
+    { v: 400, w: 1 },
+    { v: 500, w: 1 },
+    { v: 600, w: 1 },
+    { v: 700, w: 1 },
+    { v: 800, w: 1 },
+    { v: 900, w: 1 },
+    { v: 1000, w: 1 }
+  ];
+
+
+const total = options.reduce((s, o) => s + o.w, 0);
+  let r = Math.random() * total;
+  for (let i = 0; i < options.length; i++) {
+    if (r < options[i].w) return options[i].v;
+    r -= options[i].w;
+  }
+  return options[options.length - 1].v;
+}
 
         function finalizeCase(type, cost) {
             let win = 0;
