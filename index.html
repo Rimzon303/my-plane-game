@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -189,29 +190,6 @@ r-active { background: var(--btn-blue); color: white; border-color: var(--btn-bl
                 }
             }, 80);
         }
-        function getSilverReward(type, cost) 
-  const options = [
-    { v: 100, w: 5 },   // больший шанс на 100
-    { v: 200, w: 1 },
-    { v: 300, w: 1 },
-    { v: 400, w: 1 },
-    { v: 500, w: 1 },
-    { v: 600, w: 1 },
-    { v: 700, w: 1 },
-    { v: 800, w: 1 },
-    { v: 900, w: 1 },
-    { v: 1000, w: 1 }
-  ];
-
-
-const total = options.reduce((s, o) => s + o.w, 0);
-  let r = Math.random() * total;
-  for (let i = 0; i < options.length; i++) {
-    if (r < options[i].w) return options[i].v;
-    r -= options[i].w;
-  }
-  return options[options.length - 1].v;
-}
 
         function finalizeCase(type, cost) {
             let win = 0;
@@ -222,12 +200,12 @@ const total = options.reduce((s, o) => s + o.w, 0);
                 if (rand > 0.9) win = 300;
                 else if (rand > 0.5) win = 120;
                 else win = 20;
-            } } else { // серебряный
-  win = getSilverReward();
-  if (win === 1000) {
-    gotBear = true;
-  }
-}
+            } else {
+                // Серебряный: от 100 до 1000 с шагом 100
+                const prizes = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000];
+                win = prizes[Math.floor(Math.random() * prizes.length)];
+                if (win === 1000) {
+                    gotBear = true;
                 }
             }
 
