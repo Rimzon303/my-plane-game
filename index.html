@@ -222,12 +222,12 @@ const total = options.reduce((s, o) => s + o.w, 0);
                 if (rand > 0.9) win = 300;
                 else if (rand > 0.5) win = 120;
                 else win = 20;
-            } else {
-                // Серебряный: от 100 до 1000 с шагом 100
-                const prizes = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000];
-                win = prizes[Math.floor(Math.random() * prizes.length)];
-                if (win === 1000) {
-                    gotBear = true;
+            } } else { // серебряный
+  win = getSilverReward();
+  if (win === 1000) {
+    gotBear = true;
+  }
+}
                 }
             }
 
