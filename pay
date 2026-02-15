@@ -1,66 +1,103 @@
 
-import asyncio
-from aiogram import Bot, Dispatcher, F, types
-from aiogram.filters import Command
-from aiogram.types import LabeledPrice, PreCheckoutQuery, InlineKeyboardButton, InlineKeyboardMarkup
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Магазин Telegram Stars</title>
+    <!-- Подключение скрипта Telegram -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .card {
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            width: 80%;
+            max-width: 300px;
+        }
+        .star-icon {
+            font-size: 50px;
+            margin-bottom: 10px;
+        }
+        button {
+            background-color: var(--tg-theme-button-color, #2481cc);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+            width: 100%;
+        }
+        button:active {
+            opacity: 0.8;
+        }
+        .status {
+            margin-top: 15px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
 
-# Вставьте ваш токен
-API_TOKEN = "ВАШ_ТОКЕН_БОТА"
+    <div class="card">
+        <div class="star-icon">⭐️</div>
+        <h2>Покупка Звезд</h2>
+        <p>Поддержите проект, купив пакет из 50 звезд.</p>
+        <button id="buyBtn">Купить за 50 ⭐️</button>
+        <div id="status" class="status"></div>
+    </div>
 
-bot = Bot(token=API_TOKEN)
-dp = Dispatcher()
+    <script>
+        // Инициализация Telegram WebApp
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // Развернуть на весь экран
 
-# --- Клавиатура главного экрана ---
-def get_main_menu():
-    buttons = [
-        [InlineKeyboardButton(text="Начать игру 🎮", callback_data="start_game")],
-        [InlineKeyboardButton(text="Поддержать проект (10 ⭐️)", callback_data="buy_stars")]
-    ]
-    return InlineKeyboardMarkup(inline_keyboard=buttons)
+        const buyBtn = document.getElementById('buyBtn');
+        const statusDiv = document.getElementById('status');
 
-# --- Обработка команды /start ---
-@dp.message(Command("start"))
-async def cmd_start(message: types.Message):
-    await message.answer(
-        "Добро пожаловать в игру! На главном экране вы можете начать прохождение или поддержать разработчиков.",
-        reply_markup=get_main_menu()
-    )
+        buyBtn.addEventListener('click', () => {
+            // ВАЖНО: Ссылка (invoice_url) должна генерироваться на вашем сервере 
+            // через метод Bot API createInvoiceLink. 
+            // Здесь приведен пример вызова функции.
+            
+            const invoiceUrl = "ССЫЛКА_ИЗ_CREATE_INVOICE_LINK"; 
 
-# --- Отправка счета (Invoice) при нажатии на кнопку ---
-@dp.callback_query(F.data == "buy_stars")
-async def send_invoice(callback: types.CallbackQuery):
-    await callback.message.answer_invoice(
-        title="Донат звезд",
-        description="Покупка 10 звезд для поддержки разработки игры",
-        payload="internal_payment_payload_10", # Технический параметр
-        currency="XTR", # Валюта Telegram Stars
-        prices=[LabeledPrice(label="XTR", amount=10)] # Минимум 10 звезд
-    )
-    await callback.answer()
-
-# --- Подтверждение возможности платежа (PreCheckoutQuery) ---
-@dp.pre_checkout_query()
-async def process_pre_checkout(pre_checkout_query: PreCheckoutQuery):
-    # Здесь можно проверить наличие товара в базе, если нужно
-    await pre_checkout_query.answer(ok=True)
-
-# --- Обработка успешного платежа ---
-@dp.message(F.successful_payment)
-async def success_payment_handler(message: types.Message):
-    payment_info = message.successful_payment
-    await message.answer(
-        f"Оплата прошла успешно! 🎉\n"
-        f"Вы отправили: {payment_info.total_amount} ⭐️\n"
-        f"ID транзакции: {payment_info.telegram_payment_charge_id}"
-    )
-
-# --- Запуск бота ---
-async def main():
-    print("Бот запущен и готов к приему звезд...")
-    await dp.start_polling(bot)
-
-if __name__ == "__main__":
-    try:
-        asyncio.run(main())
-    except KeyboardInterrupt:
-        print("Бот выключен")
+            if (invoiceUrl === "ССЫЛКА_ИЗ_CREATE_INVOICE_LINK") {
+                statusDiv.innerText = "Ошибка: Не настроена ссылка на оплату!";
+                statusDiv.style.color = "red";
+                return;
+            }
+       // Открытие окна оплаты внутри Telegram
+            tg.openInvoice(invoiceUrl, (status) => {
+                if (status === 'paid') {
+                    statusDiv.innerText = "Оплата успешно завершена! 🎉";
+                    statusDiv.style.color = "green";
+                    buyBtn.style.display = "none";
+                } else if (status === 'cancelled') {
+                    statusDiv.innerText = "Оплата отменена пользователем.";
+                    statusDiv.style.color = "orange";
+                } else if (status === 'failed') {
+                    statusDiv.innerText = "Произошла ошибка при оплате.";
+                    statusDiv.style.color = "red";
+                }
+            });
+        });
+    </script>
+</body>
+</html>
